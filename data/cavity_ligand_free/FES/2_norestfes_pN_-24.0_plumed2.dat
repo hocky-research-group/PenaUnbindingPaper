@@ -1,0 +1,24 @@
+UNITS LENGTH=A TIME=fs ENERGY=kcal/mol
+water: READ FILE=2_norestfes_pN_-24.0.water  VALUES=d1 EVERY=2 #IGNORE_FORCES IGNORE_TIME
+distance: READ FILE=2_norestfes_pN_-24.0.pullcolvar.out  VALUES=real IGNORE_FORCES IGNORE_TIME
+
+rbias: READ FILE=2_norestfes_pN_-24.0.metad.out VALUES=metad.rbias IGNORE_FORCES IGNORE_TIME
+metadbias: REWEIGHT_METAD ARG=rbias.rbias TEMP=300.0
+
+# metadbias: REWEIGHT_BIAS ARG=rbias.bias TEMP=300.0
+
+hwater2: HISTOGRAM ARG=water STRIDE=1 GRID_MIN=0.0 GRID_MAX=40 GRID_BIN=40 BANDWIDTH=0.1 LOGWEIGHTS=metadbias
+hzdist2: HISTOGRAM ARG=distance STRIDE=1 GRID_MIN=7.6 GRID_MAX=20.0 GRID_BIN=300 BANDWIDTH=0.1 LOGWEIGHTS=metadbias
+
+ffwater2: CONVERT_TO_FES GRID=hwater2 TEMP=300
+ffz2: CONVERT_TO_FES GRID=hzdist2 TEMP=300
+
+DUMPGRID GRID=ffz2  FILE=2_norestfes_pN_-24.0_z2.dat
+DUMPGRID GRID=ffwater2 FILE=2_norestfes_pN_-24.0_water2.dat
+
+twocv: HISTOGRAM ARG=distance,water STRIDE=1 GRID_MIN=8.0,0.0 GRID_MAX=20.0,40 GRID_BIN=500,40 BANDWIDTH=0.05,0.05 LOGWEIGHTS=metadbias
+fftwocv: CONVERT_TO_FES GRID=twocv TEMP=300
+DUMPGRID GRID=fftwocv FILE=2_norestfes_pN_-24.0_fftwocv2.dat
+
+PRINT ARG=distance,water,rbias.rbias,metadbias STRIDE=1 FILE=2_norestfes_pN_-24.0_reweightedcolvar2.out
+
