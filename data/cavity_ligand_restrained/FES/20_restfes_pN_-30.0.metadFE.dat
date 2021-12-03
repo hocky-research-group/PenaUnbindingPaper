@@ -1,0 +1,49 @@
+UNITS LENGTH=A TIME=fs ENERGY=kcal/mol
+#WHOLEMOLECULES ENTITY0=9021-9080
+
+c1: COM ATOMS=9021-9080
+c2: COM ATOMS=1-9020 NOPBC
+c3: COM ATOMS=8121-9020 NOPBC
+
+distance: DISTANCE ATOMS=c2,c1 COMPONENTS
+real: DISTANCE ATOMS=c2,c1
+
+xydist2: COMBINE ARG=distance.x,distance.y POWERS=2,2 PERIODIC=NO
+xydist: COMBINE ARG=xydist2 POWERS=0.5 PERIODIC=NO
+
+#The conversion factor is 69.4786 pN = 1 kcal/mol/Angstrom
+#100pN = 1.4425 kcal/mol/A
+
+p: RESTRAINT ...
+    ARG=real
+    AT=0
+    SLOPE=-.4317877620
+    KAPPA=0
+... p:
+
+UPPER_WALLS ARG=distance.z AT=17.0 KAPPA=38.83 EXP=4 EPS=1 OFFSET=0 LABEL=uwall
+
+
+METAD ...
+ LABEL=metad
+ ARG=distance.z PACE=300 HEIGHT=0.478011 SIGMA=0.2 GRID_MIN=7.0 GRID_MAX=18.0 GRID_SPACING=0.02 BIASFACTOR=15.0 TEMP=300.0
+ FILE=../../data/stericRest_FES_verletProd-20/20_restfes_pN_-30.0.hills 
+ CALC_RCT
+ ACCELERATION #=TRUE
+ CALC_MAX_BIAS 
+ #CALC_TRANSITION_BIAS
+... METAD
+
+
+PRINT ARG=metad.bias,metad.rct,metad.rbias,metad.acc,metad.maxbias STRIDE=500 FILE=../../data/stericRest_FES_verletProd-20/20_restfes_pN_-30.0.metad.out
+
+density: DENSITY SPECIES=9081-22577:4  
+#d2: INCYLINDER ATOM=c3 DATA=density DIRECTION=Z RADIUS={TANH R_0=12.0} SIGMA=0.1 LOWER=-4.6 UPPER=4.6 NOPBC
+
+AROUND SIGMA=0.1 DATA=density ATOM=c3 XLOWER=-11.725 XUPPER=11.725 YLOWER=-12.815 YUPPER=12.815 ZLOWER=-4.595 ZUPPER=4.595 LABEL=d1
+
+#DUMPATOMS STRIDE=500 FILE=../../data/stericRest_FES_verletProd-20/20_restfes_pN_-30.0.xyz ATOMS=c1,c2,c3
+
+PRINT ARG=d1.* STRIDE=250 FILE=../../data/stericRest_FES_verletProd-20/20_restfes_pN_-30.0.water
+PRINT ARG=real,distance.z,xydist,p.force2,uwall.bias STRIDE=500 FILE=../../data/stericRest_FES_verletProd-20/20_restfes_pN_-30.0.pullcolvar.out
+
