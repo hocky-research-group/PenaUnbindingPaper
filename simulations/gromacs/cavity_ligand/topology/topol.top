@@ -1,0 +1,36 @@
+; topology file in jingyuan style
+[ defaults ]
+; nbfunc        comb-rule       gen-pairs       fudgeLJ fudgeQQ
+1                   3              yes            0.5     0.5
+
+[atomtypes]
+OW    OW   8   15.9994     0.000     A      3.15365e-01   6.48520e-01
+HW    HW   1    1.0079    +0.520     A      0.0           0.0
+MW    MW   0    0.0000    -1.040     D      0.0           0.0
+CF    CF   6   12.0110     0.000     A      0.35          0.276144
+CW    CW   6   12.0110     0.000     A      0.4152        0.0024
+CP    CP   6   12.0110     0.000     A      0.4152        0.0080
+
+[nonbond_params]
+CP    CP 1  0.12500 0.000
+CW    CW 1  0.12500 0.000
+CP    CW 1  0.12500 0.000
+
+; topologies for wall
+#include "wall.itp"
+
+; topologies for fullerine
+#include "c60n.itp"
+
+; TIP4P WATER
+#include "tip4p.itp"
+
+[ system ]
+; Name
+C60 in solvent in water
+
+[ molecules ]
+; Compound        #mols
+CWALL                1
+C60                  1
+SOL              3375
