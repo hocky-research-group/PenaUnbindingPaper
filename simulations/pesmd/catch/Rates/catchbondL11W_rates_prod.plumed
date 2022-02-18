@@ -1,0 +1,25 @@
+d1: DISTANCE ATOMS=1,2 COMPONENTS NOPBC
+ff: MATHEVAL ARG=d1.x,d1.y PERIODIC=NO FUNC=-log(exp(-((((0.4*y-1)^2)-4)^2+((x-6-y)^2)/2))+0.2*exp(-(x-11)^2-(y+0.5)^2/0.5))
+bb: BIASVALUE ARG=ff
+
+dist: DISTANCE ATOMS=1,2 NOPBC
+
+p: RESTRAINT ARG=d1.x AT=0 SLOPE=_FORCE_ KAPPA=0
+
+metad: METAD ARG=d1.x,d1.y PACE=7500 HEIGHT=1.2 SIGMA=0.2,0.2 FILE=_OUTPREFIX_.hills BIASFACTOR=6 TEMP=300 ACCELERATION 
+
+COMMITTOR ...
+ ARG=d1.x,d1.y
+ STRIDE=2
+ BASIN_LL1=_MIN_,_MINY_
+ BASIN_UL1=_MAX_,_MAXY_
+... COMMITTOR
+
+
+total: MATHEVAL ARG=bb.ff_bias,p.bias PERIODIC=NO FUNC=x+y
+DUMPATOMS STRIDE=200 FILE=_OUTPREFIX_.xyz ATOMS=1-2,
+
+PRINT ARG=metad.bias,metad.acc,dist,d1.x,d1.y STRIDE=20 FILE=_OUTPREFIX_.metad.out
+PRINT ARG=d1.x,d1.y,bb.ff_bias,p.bias,total FILE=_OUTPREFIX_.temp_1.0.colvar.out STRIDE=100
+
+

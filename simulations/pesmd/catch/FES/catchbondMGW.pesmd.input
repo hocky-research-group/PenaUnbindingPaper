@@ -1,9 +1,0 @@
-temperature 1
-tstep 0.02
-friction 1
-dimension 2
-nstep 20000000
-ipos 5 -2.5
-idum _SEED_
-periodic false
-plumed _OUTPREFIX_
